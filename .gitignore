@@ -1,4 +1,4 @@
 ﻿
-.vs/
-Debug/net6.0/
-Debug/net6.0/
+.vs/**
+CityInfo.API/bin/Debug/net6.0/**
+CityInfo.API/obj/Debug/net6.0/**
