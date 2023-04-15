@@ -2,3 +2,4 @@
 .vs/**
 CityInfo.API/bin/Debug/net6.0/**
 CityInfo.API/obj/Debug/net6.0/**
+/CityInfo.API/obj/Debug/net6.0/CityInfo.API.pdb
