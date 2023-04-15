@@ -1,4 +1,5 @@
 ﻿
 .vs
+.vs/**
 CityInfo.API/bin/**
 CityInfo.API/obj/**
