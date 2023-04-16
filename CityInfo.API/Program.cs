@@ -18,15 +18,21 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+//app.UseRouting();
+
 app.UseAuthorization();
+
+//app.UseEndpoints(endpoints => {
+//    endpoints.MapControllers();
+//});
 
 app.MapControllers();
 
 // Below code output the stirng if there is no middleware configured
 // remove "swagger" from the url
-app.Run(async (context) =>
-{
-    await context.Response.WriteAsync("Hello world!");
-});
+//app.Run(async (context) =>
+//{
+//    await context.Response.WriteAsync("Hello world!");
+//});
 
 app.Run();
