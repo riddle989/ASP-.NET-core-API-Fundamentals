@@ -45,6 +45,7 @@ namespace CityInfo.API.Controllers
 
 
             // Now the contenttype is set automatically
+            // The method "File()" is defined in "ControllerBase"
             return File(bytes, contentType, Path.GetFileName(pathToFile));
         }
     }
