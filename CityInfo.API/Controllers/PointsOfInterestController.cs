@@ -1,5 +1,6 @@
 ﻿using CityInfo.API.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CityInfo.API.Controllers
@@ -20,14 +21,14 @@ namespace CityInfo.API.Controllers
         }
 
         [HttpGet("{pointofinterestid}", Name = "GetPointOfInterest")]
-        public ActionResult<PointOfInterestDto> GetPointOfInterest(int cityId,int pointOfInterestId)
+        public ActionResult<PointOfInterestDto> GetPointOfInterest(int cityId, int pointOfInterestId)
         {
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
             if (city == null) { return NotFound(); }
 
             var pointOfInterest = city.PointsOfInterest.FirstOrDefault(p => p.Id == pointOfInterestId);
-            
+
             if (pointOfInterest == null) { return NotFound(); }
 
             return Ok(pointOfInterest);
@@ -54,7 +55,7 @@ namespace CityInfo.API.Controllers
 
             var city = citiesStatic.FirstOrDefault(c => c.Id == cityId);
 
-            if(city == null) { return NotFound(); }
+            if (city == null) { return NotFound(); }
 
             var maxPointOfInterestId = CitiesDataStore.Current.Cities.SelectMany(c => c.PointsOfInterest).Max(p => p.Id);
 
@@ -82,16 +83,16 @@ namespace CityInfo.API.Controllers
 
 
         [HttpPut("{pointofinterestid}")]
-        public ActionResult UpdatePointOfInterest(int cityId,int pointOfInterestId,
+        public ActionResult UpdatePointOfInterest(int cityId, int pointOfInterestId,
             PointOfInterestForUpdateDto pointOfInterest)
         {
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
-            if(city == null) { return NotFound();}
+            if (city == null) { return NotFound(); }
 
             var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(p => p.Id == pointOfInterestId);
 
-            if(pointOfInterest == null) { return NotFound(); }
+            if (pointOfInterestFromStore == null) { return NotFound(); }
 
             pointOfInterestFromStore.Name = pointOfInterest.Name;
             pointOfInterestFromStore.Description = pointOfInterest.Description;
@@ -99,6 +100,40 @@ namespace CityInfo.API.Controllers
             return NoContent();
         }
 
+        [HttpPatch("{pointofinterestid}")]
+        public ActionResult PartiallyUpdatePointOfInterest(int cityId, int pointOfInterestId,
+            JsonPatchDocument<PointOfInterestForUpdateDto> patchDocument)
+        {
+            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
+            if (city == null) { return NotFound(); }
+
+            var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(p => p.Id == pointOfInterestId);
+
+            if (pointOfInterestFromStore == null) { return NotFound(); }
+
+            var pointOfInterestToPatch =
+                new PointOfInterestForUpdateDto()
+                {
+                    Name = pointOfInterestFromStore.Name,
+                    Description = pointOfInterestFromStore.Description
+                };
+
+            patchDocument.ApplyTo(pointOfInterestToPatch, ModelState);
+
+            // To check if there are any error while applying the given payload to the actual data
+            // like, client send an invalid property that is not present in the actual object
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+
+            // To check if there are any error after applying the given payload against the model's data annotation / rules
+            // like, after successfully applying the patch, the actual model's rule can't be satisfied
+            //ex. "Required" filed removed or "Maxlength" field cross the limit
+            if (!TryValidateModel(pointOfInterestToPatch)) { return BadRequest(ModelState); }
+
+            pointOfInterestFromStore.Name = pointOfInterestToPatch.Name;
+            pointOfInterestFromStore.Description= pointOfInterestToPatch.Description;
+
+            return NoContent();
+        }
     }
 }
