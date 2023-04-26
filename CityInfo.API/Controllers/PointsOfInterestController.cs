@@ -119,10 +119,10 @@ namespace CityInfo.API.Controllers
                     Description = pointOfInterestFromStore.Description
                 };
 
-            patchDocument.ApplyTo(pointOfInterestToPatch, ModelState);
-
             // To check if there are any error while applying the given payload to the actual data
             // like, client send an invalid property that is not present in the actual object
+            // and any error of that type make the "ModelState" invalid, so we pass it to the "ApplyTo" method
+            patchDocument.ApplyTo(pointOfInterestToPatch, ModelState);
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
 
             // To check if there are any error after applying the given payload against the model's data annotation / rules
