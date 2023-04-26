@@ -45,6 +45,14 @@ namespace CityInfo.API.Controllers
             int cityId,
             PointOfInterestForCreationDto pointOfInterestForCreationDto) //We can explicitly say it is [FromBody] attribute
         {
+            // We can explicitly check wheteher the given input is valid according to the model's specified data annotation
+            // But it is done automatically
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest();
+            //}
+
+
             //Create new instance of the object each time this action is called 
             var citiesDynamic = new CitiesDataStore().Cities;
 
