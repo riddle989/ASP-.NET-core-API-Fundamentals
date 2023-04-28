@@ -23,16 +23,29 @@ namespace CityInfo.API.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<PointOfInterestDto>> GetPointsOfInterest(int cityId)
         {
-            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
-            //Console.WriteLine("FFFFFFFF "+ cityId);
-
-            if (city == null) 
+            try 
             {
-                _logger.LogInformation($"City with id {cityId} wasn't found....!");
-                return NotFound(); 
-            }
+                throw new NotImplementedException("Custom Exception sample");
+                var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+                //Console.WriteLine("FFFFFFFF "+ cityId);
 
-            return Ok(city.PointsOfInterest);
+                if (city == null)
+                {
+                    _logger.LogInformation($"City with id {cityId} wasn't found....!");
+                    return NotFound();
+                }
+
+                return Ok(city.PointsOfInterest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(
+                    $"City with id {cityId} wasn't found....!",
+                    ex);
+                // As we are catching the error, We need to manually send the error to the response
+                return StatusCode(500, "Custom msg - A problem happend while handling your reqeust.");
+            }
+            
         }
 
         [HttpGet("{pointofinterestid}", Name = "GetPointOfInterest")]

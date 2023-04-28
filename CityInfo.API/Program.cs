@@ -1,10 +1,21 @@
 using Microsoft.AspNetCore.StaticFiles;
+using Serilog;
+
+// Configure the logger
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .WriteTo.File("logs/cityinfo.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Remove all the logging provider and add only specific logging provider
 //builder.Logging.ClearProviders();
 //builder.Logging.AddDebug();
+
+// Add 3rd party logger service
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllers().AddNewtonsoftJson();
