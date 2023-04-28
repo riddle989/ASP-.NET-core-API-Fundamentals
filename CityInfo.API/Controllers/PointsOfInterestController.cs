@@ -9,13 +9,28 @@ namespace CityInfo.API.Controllers
     [ApiController]
     public class PointsOfInterestController : ControllerBase
     {
+        private readonly ILogger<PointsOfInterestController> _logger;
+
+        public PointsOfInterestController(ILogger<PointsOfInterestController> logger) 
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            
+            // We can always request a service from the container directly, If we want to dependency injection throughe constructor
+            //HttpContext.RequestServices.GetService(SERVICE_NAME)
+
+        }
+
         [HttpGet]
         public ActionResult<IEnumerable<PointOfInterestDto>> GetPointsOfInterest(int cityId)
         {
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
             //Console.WriteLine("FFFFFFFF "+ cityId);
 
-            if (city == null) { return NotFound(); }
+            if (city == null) 
+            {
+                _logger.LogInformation($"City with id {cityId} wasn't found....!");
+                return NotFound(); 
+            }
 
             return Ok(city.PointsOfInterest);
         }
@@ -25,7 +40,10 @@ namespace CityInfo.API.Controllers
         {
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
-            if (city == null) { return NotFound(); }
+            if (city == null) 
+            {
+                return NotFound(); 
+            }
 
             var pointOfInterest = city.PointsOfInterest.FirstOrDefault(p => p.Id == pointOfInterestId);
 
