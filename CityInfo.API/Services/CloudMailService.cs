@@ -2,15 +2,18 @@
 {
     public class CloudMailService : IMailService
     {
-        public string _mailTo = "admin@mycompany.com";
-        public string _mailFrom = "noreply@mycompany.com";
+        private readonly string _mailTo = string.Empty;
+        private readonly string _mailFrom = string.Empty;
 
         private readonly ILogger<CloudMailService> _logger;
 
 
-        public CloudMailService(ILogger<CloudMailService> logger)
+        public CloudMailService(ILogger<CloudMailService> logger,
+            IConfiguration configuration)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mailTo = configuration["mailSettings:mailToAddress"];
+            _mailFrom = configuration["mailSettings:mailFromAddress"];
         }
 
         public void Send(string subject, string message)

@@ -4,15 +4,20 @@ namespace CityInfo.API.Services
 {
     public class LocalMailService : IMailService
     {
-        public string _mailTo = "admin@mycompany.com";
-        public string _mailFrom = "noreply@mycompany.com";
+        // we are using readonly, so that these fields value can't be modified after "LocalMailService" object is
+        //created by the constructor.
+        private readonly string _mailTo = string.Empty;
+        private readonly string _mailFrom = string.Empty;
 
         private readonly ILogger<LocalMailService> _logger;
 
 
-        public LocalMailService(ILogger<LocalMailService> logger)
+        public LocalMailService(ILogger<LocalMailService> logger,
+            IConfiguration configuration)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mailTo = configuration["mailSettings:mailToAddress"];
+            _mailFrom = configuration["mailSettings:mailFromAddress"];
         }
 
         public void Send(string subject, string message)
