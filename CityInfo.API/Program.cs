@@ -1,3 +1,5 @@
+using CityInfo.API;
+using CityInfo.API.Services;
 using Microsoft.AspNetCore.StaticFiles;
 using Serilog;
 
@@ -27,6 +29,27 @@ builder.Services.AddSwaggerGen();
 
 // This service provides us the file extension types
 builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
+
+
+
+
+// Custom services
+// Use different service based on environment using compiler directive
+#if DEBUG
+// This means, Whenever we inject "IMailService" in our code,we want to provide an instance of "LocalMailService"
+builder.Services.AddTransient<IMailService, LocalMailService>();
+#else
+builder.Services.AddTransient<IMailService, CloudMailService>();
+#endif
+
+builder.Services.AddSingleton<CitiesDataStore>();
+
+
+
+
+
+
+
 
 var app = builder.Build();
 

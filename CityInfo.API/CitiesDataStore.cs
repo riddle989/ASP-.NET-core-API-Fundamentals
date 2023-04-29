@@ -8,7 +8,7 @@ namespace CityInfo.API
 
         // This is like singletone pattern,
         // this make sure we are working on the same datastore as long as we don't restart the web server
-        public static CitiesDataStore Current { get; set; } = new CitiesDataStore();
+        //public static CitiesDataStore Current { get; set; } = new CitiesDataStore();
 
         public CitiesDataStore() { 
             Cities = new List<CityDto>()

@@ -3,3 +3,4 @@
 .vs/**
 CityInfo.API/bin/**
 CityInfo.API/obj/**
+CityInfo.API/logs/**
