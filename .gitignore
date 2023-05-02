@@ -4,3 +4,6 @@
 CityInfo.API/bin/**
 CityInfo.API/obj/**
 CityInfo.API/logs/**
+CityInfo.API/Migrations/**
+CityInfo.API/CityInfo.db
+CityInfo.API/CityInfo.db**
