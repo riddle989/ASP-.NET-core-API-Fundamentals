@@ -51,6 +51,9 @@ builder.Services.AddDbContext<CityInfoContext>(
         )
     );
 
+// "AddScoped" - created once per request
+builder.Services.AddScoped<ICityInfoRepository, CityInfoRepository>();
+
 
 
 
