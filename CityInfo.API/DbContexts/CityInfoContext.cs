@@ -37,15 +37,15 @@ namespace CityInfo.API.DbContexts
                         Id = 1,
                         Description = "This is Dhaka City."
                     },
-                    new City("Khulna")
-                    {
-                        Id = 2,
-                        Description = "This is Khulna City."
-                    },
                     new City("Sylhet")
                     {
-                        Id = 3,
+                        Id = 2,
                         Description = "This is Sylhet City."
+                    },
+                    new City("Khulna")
+                    {
+                        Id = 3,
+                        Description = "This is Khulna City."
                     });
 
             modelBuilder.Entity<PointOfInterest>()
