@@ -53,6 +53,7 @@ builder.Services.AddDbContext<CityInfoContext>(
 
 // "AddScoped" - created once per request
 builder.Services.AddScoped<ICityInfoRepository, CityInfoRepository>();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
 
