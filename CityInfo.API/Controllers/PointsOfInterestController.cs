@@ -1,4 +1,5 @@
-﻿using CityInfo.API.Models;
+﻿using AutoMapper;
+using CityInfo.API.Models;
 using CityInfo.API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -13,14 +14,24 @@ namespace CityInfo.API.Controllers
         private readonly ILogger<PointsOfInterestController> _logger;
         private readonly IMailService _mailService;
         private readonly CitiesDataStore _citiesDataStore;
+        private readonly IMapper _mapper;
+        private readonly ICityInfoRepository _cityInfoRepository;
 
         public PointsOfInterestController(ILogger<PointsOfInterestController> logger,
             IMailService mailService,
-            CitiesDataStore citiesDataStore) 
+            CitiesDataStore citiesDataStore,
+            IMapper mapper,
+            ICityInfoRepository cityInfoRepository) 
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _mailService = mailService ?? throw new ArgumentNullException(nameof(mailService));
-            _citiesDataStore = citiesDataStore ?? throw new ArgumentNullException(nameof(citiesDataStore));
+            _logger = logger ?? 
+                throw new ArgumentNullException(nameof(logger));
+            _mailService = mailService ?? 
+                throw new ArgumentNullException(nameof(mailService));
+            //_citiesDataStore = citiesDataStore ?? throw new ArgumentNullException(nameof(citiesDataStore));
+            _mapper = mapper ?? 
+                throw new ArgumentNullException(nameof(mapper));
+            _cityInfoRepository = cityInfoRepository ??
+                throw new ArgumentNullException(nameof(cityInfoRepository));
 
 
             // We can always request a service from the container directly, If we want to dependency injection throughe constructor
@@ -29,50 +40,69 @@ namespace CityInfo.API.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<PointOfInterestDto>> GetPointsOfInterest(int cityId)
+        public async Task<ActionResult<IEnumerable<PointOfInterestDto>>> GetPointsOfInterest(int cityId)
         {
-            try 
-            {
-                //throw new NotImplementedException("Custom Exception sample");
-                var city = _citiesDataStore.Cities.FirstOrDefault(c => c.Id == cityId);
-                //Console.WriteLine("FFFFFFFF "+ cityId);
+            /* We will use Entities instead */
+            ///* throw new NotImplementedException("Custom Exception sample") */
+            //try
+            //{
+            //    var city = _citiesDataStore.Cities.FirstOrDefault(c => c.Id == cityId);
+            //    //Console.WriteLine("FFFFFFFF "+ cityId);
 
-                if (city == null)
-                {
-                    _logger.LogInformation($"City with id {cityId} wasn't found....!");
-                    return NotFound();
-                }
+            //    if (city == null)
+            //    {
+            //        _logger.LogInformation($"City with id {cityId} wasn't found....!");
+            //        return NotFound();
+            //    }
                 
-                return Ok(city.PointsOfInterest);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogCritical(
-                    $"City with id {cityId} wasn't found....!",
-                    ex);
-                // As we are catching the error, We need to manually send the error to the response
-                return StatusCode(500, "Custom msg - A problem happend while handling your reqeust.");
-            }
+            //    return Ok(city.PointsOfInterest);
+            //}
+            //catch (Exception ex)
+            //{
+            //    _logger.LogCritical(
+            //        $"City with id {cityId} wasn't found....!",
+            //        ex);
+            //    // As we are catching the error, We need to manually send the error to the response
+            //    return StatusCode(500, "Custom msg - A problem happend while handling your reqeust.");
+            //}
             
+            if(!await _cityInfoRepository.CityExistsAsync(cityId))
+            {
+                _logger.LogInformation($"City with id {cityId} wasn't found....!");
+                return NotFound();
+            }
+
+            var PointOfInterestForCity = await _cityInfoRepository.GetPointsOfInterestForCityAsync(cityId);
+            return Ok(_mapper.Map<IEnumerable<PointOfInterestDto>>(PointOfInterestForCity));
         }
 
         [HttpGet("{pointofinterestid}", Name = "GetPointOfInterest")]
-        public ActionResult<PointOfInterestDto> GetPointOfInterest(int cityId, int pointOfInterestId)
+        public async Task<ActionResult<PointOfInterestDto>> GetPointOfInterest(int cityId, int pointOfInterestId)
         {
-            var city = _citiesDataStore.Cities.FirstOrDefault(c => c.Id == cityId);
+            /* We will use Entities instead */
+            //var city = _citiesDataStore.Cities.FirstOrDefault(c => c.Id == cityId);
+            //if (city == null) 
+            //{
+            //    return NotFound(); 
+            //}
+            //var pointOfInterest = city.PointsOfInterest.FirstOrDefault(p => p.Id == pointOfInterestId);
+            //if (pointOfInterest == null) { return NotFound(); }
+            //return Ok(pointOfInterest);
 
-            if (city == null) 
+            if(!await _cityInfoRepository.CityExistsAsync(cityId))
             {
-                return NotFound(); 
+                return NotFound();
             }
-
-            var pointOfInterest = city.PointsOfInterest.FirstOrDefault(p => p.Id == pointOfInterestId);
-
-            if (pointOfInterest == null) { return NotFound(); }
-
-            return Ok(pointOfInterest);
+            var pointOfInterest = await _cityInfoRepository.GetPointOfInterestForCityAsync(cityId, pointOfInterestId);
+            if (pointOfInterest == null)
+            {
+                return NotFound();
+            }
+            return Ok(_mapper.Map<PointOfInterestDto>(pointOfInterest));
         }
 
+
+        /*
         [HttpPost]
         public ActionResult<PointOfInterestForCreationDto> CreatePointOfInterest(
             int cityId,
@@ -195,7 +225,7 @@ namespace CityInfo.API.Controllers
                 $"Point of interest {pointOfInterestFromStore.Name} with id {pointOfInterestFromStore.Id} was deleted");
 
             return NoContent();
-        }
+        }*/
 
     }
 }
