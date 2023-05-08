@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CityInfo.API.Entities;
 using CityInfo.API.Models;
 using CityInfo.API.Services;
 using Microsoft.AspNetCore.Http;
@@ -163,21 +164,39 @@ namespace CityInfo.API.Controllers
                 createdPointOfInterestToReturn);
         }
 
-        /*
+        
         [HttpPut("{pointofinterestid}")]
-        public ActionResult UpdatePointOfInterest(int cityId, int pointOfInterestId,
+        public async Task<ActionResult> UpdatePointOfInterest(int cityId, int pointOfInterestId,
             PointOfInterestForUpdateDto pointOfInterest)
         {
-            var city = _citiesDataStore.Cities.FirstOrDefault(c => c.Id == cityId);
+            /* We will use the Entities instead */
+            //var city = _citiesDataStore.Cities.FirstOrDefault(c => c.Id == cityId);
+            //if (city == null) { return NotFound(); }
+            //var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(p => p.Id == pointOfInterestId);
+            //if (pointOfInterestFromStore == null) { return NotFound(); }
+            //pointOfInterestFromStore.Name = pointOfInterest.Name;
+            //pointOfInterestFromStore.Description = pointOfInterest.Description;
 
-            if (city == null) { return NotFound(); }
+            if (!await _cityInfoRepository.CityExistsAsync(cityId))
+            {
+                return NotFound();
+            }
 
-            var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(p => p.Id == pointOfInterestId);
+            var pointOfInterestEntity = await _cityInfoRepository
+                .GetPointOfInterestForCityAsync(cityId, pointOfInterestId);
 
-            if (pointOfInterestFromStore == null) { return NotFound(); }
+            if(pointOfInterestEntity == null)
+            {
+                return NotFound();
+            }
 
-            pointOfInterestFromStore.Name = pointOfInterest.Name;
-            pointOfInterestFromStore.Description = pointOfInterest.Description;
+            /* We use this override, bcz we are mapping from one object to another object */
+            _mapper.Map(pointOfInterest, pointOfInterestEntity);
+
+            /* We use this override, when we need to map on object to another "type" */
+            //_mapper.Map<pointOfInterestEntity>(pointOfInterest);
+
+            await _cityInfoRepository.SaveChangesAsync();
 
             return NoContent();
         }
