@@ -190,7 +190,9 @@ namespace CityInfo.API.Controllers
                 return NotFound();
             }
 
-            /* We use this override, bcz we are mapping from one object to another object */
+            /* We use this override, bcz we are mapping from one object to another object 
+               ## If we use the below version, a new entry will be created, instead of updating the existing object
+            */
             _mapper.Map(pointOfInterest, pointOfInterestEntity);
 
             /* We use this override, when we need to map on object to another "type" */
@@ -201,29 +203,44 @@ namespace CityInfo.API.Controllers
             return NoContent();
         }
 
-        /*
+        
         [HttpPatch("{pointofinterestid}")]
-        public ActionResult PartiallyUpdatePointOfInterest(int cityId, int pointOfInterestId,
+        public async Task<ActionResult> PartiallyUpdatePointOfInterest(int cityId, int pointOfInterestId,
             JsonPatchDocument<PointOfInterestForUpdateDto> patchDocument)
         {
-            var city = _citiesDataStore.Cities.FirstOrDefault(c => c.Id == cityId);
+            /* We will use the Entities instead */
+            //var city = _citiesDataStore.Cities.FirstOrDefault(c => c.Id == cityId);
+            //if (city == null) { return NotFound(); }
+            //var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(p => p.Id == pointOfInterestId);
+            //if (pointOfInterestFromStore == null) { return NotFound(); }
+            //var pointOfInterestToPatch =
+            //    new PointOfInterestForUpdateDto()
+            //    {
+            //        Name = pointOfInterestFromStore.Name,
+            //        Description = pointOfInterestFromStore.Description
+            //    };
 
-            if (city == null) { return NotFound(); }
+            if (!await _cityInfoRepository.CityExistsAsync(cityId))
+            {
+                return NotFound();
+            }
 
-            var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(p => p.Id == pointOfInterestId);
+            var pointOfInterestEntity = await _cityInfoRepository
+                .GetPointOfInterestForCityAsync(cityId, pointOfInterestId);
 
-            if (pointOfInterestFromStore == null) { return NotFound(); }
+            if (pointOfInterestEntity == null)
+            {
+                return NotFound();
+            }
 
-            var pointOfInterestToPatch =
-                new PointOfInterestForUpdateDto()
-                {
-                    Name = pointOfInterestFromStore.Name,
-                    Description = pointOfInterestFromStore.Description
-                };
+            /* The parameter patch doc is of type "PointOfInterestForUpdateDto" type, so we need to convert the entity object first */
+            var pointOfInterestToPatch = _mapper.Map<PointOfInterestForUpdateDto>(pointOfInterestEntity);
 
-            // To check if there are any error while applying the given payload to the actual data
-            // like, client send an invalid property that is not present in the actual object
-            // and any error of that type make the "ModelState" invalid, so we pass it to the "ApplyTo" method
+            /*
+              To check if there are any error while applying the given payload to the actual data
+              like, client send an invalid property that is not present in the actual object
+              and any error of that type make the "ModelState" invalid, so we pass it to the "ApplyTo" method
+            */
             patchDocument.ApplyTo(pointOfInterestToPatch, ModelState);
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
 
@@ -232,12 +249,16 @@ namespace CityInfo.API.Controllers
             //ex. "Required" filed removed or "Maxlength" field cross the limit
             if (!TryValidateModel(pointOfInterestToPatch)) { return BadRequest(ModelState); }
 
-            pointOfInterestFromStore.Name = pointOfInterestToPatch.Name;
-            pointOfInterestFromStore.Description= pointOfInterestToPatch.Description;
+            /* We will use the Entities instead */
+            //pointOfInterestFromStore.Name = pointOfInterestToPatch.Name;
+            //pointOfInterestFromStore.Description= pointOfInterestToPatch.Description;
+
+            _mapper.Map(pointOfInterestToPatch, pointOfInterestEntity);
+            await _cityInfoRepository.SaveChangesAsync();
 
             return NoContent();
         }
-
+        /*
         [HttpDelete("{pointofinterestid}")]
         public ActionResult DeletePointOfInterest(int cityId, int pointOfInterestId)
         {
