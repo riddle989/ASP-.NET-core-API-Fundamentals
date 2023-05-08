@@ -19,7 +19,7 @@ namespace CityInfo.API.Controllers
 
         public PointsOfInterestController(ILogger<PointsOfInterestController> logger,
             IMailService mailService,
-            CitiesDataStore citiesDataStore,
+            //CitiesDataStore citiesDataStore,
             IMapper mapper,
             ICityInfoRepository cityInfoRepository) 
         {
@@ -102,11 +102,11 @@ namespace CityInfo.API.Controllers
         }
 
 
-        /*
+        
         [HttpPost]
-        public ActionResult<PointOfInterestForCreationDto> CreatePointOfInterest(
+        public async Task<ActionResult<PointOfInterestForCreationDto>> CreatePointOfInterest(
             int cityId,
-            PointOfInterestForCreationDto pointOfInterestForCreationDto) //We can explicitly say it is [FromBody] attribute
+            PointOfInterestForCreationDto pointOfInterest) //We can explicitly say it is [FromBody] attribute
         {
             // We can explicitly check wheteher the given input is valid according to the model's specified data annotation
             // But it is done automatically
@@ -122,22 +122,33 @@ namespace CityInfo.API.Controllers
             //Preserve the same instances throughout the application life cycle
             //var citiesStatic = CitiesDataStore.Current.Cities;
 
-            var cities = _citiesDataStore.Cities;
+            /* We will use the Entities instead */
+            //var cities = _citiesDataStore.Cities;
+            //var city = cities.FirstOrDefault(c => c.Id == cityId);
+            //if (city == null) { return NotFound(); }
+            //var maxPointOfInterestId = _citiesDataStore.Cities.SelectMany(c => c.PointsOfInterest).Max(p => p.Id);
+            //var finalPointOfInterest = new PointOfInterestDto()
+            //{
+            //    Id = ++maxPointOfInterestId,
+            //    Name = pointOfInterestForCreationDto.Name,
+            //    Description = pointOfInterestForCreationDto.Description
+            //};
+            //city.PointsOfInterest.Add(finalPointOfInterest);
 
-            var city = cities.FirstOrDefault(c => c.Id == cityId);
-
-            if (city == null) { return NotFound(); }
-
-            var maxPointOfInterestId = _citiesDataStore.Cities.SelectMany(c => c.PointsOfInterest).Max(p => p.Id);
-
-            var finalPointOfInterest = new PointOfInterestDto()
+            if(!await _cityInfoRepository.CityExistsAsync(cityId))
             {
-                Id = ++maxPointOfInterestId,
-                Name = pointOfInterestForCreationDto.Name,
-                Description = pointOfInterestForCreationDto.Description
-            };
+                return NotFound();
+            }
 
-            city.PointsOfInterest.Add(finalPointOfInterest);
+            var finalPointOfInterest = _mapper.Map<Entities.PointOfInterest>(pointOfInterest);
+
+            await _cityInfoRepository.AddPointOfInterestForCityAsync(cityId, finalPointOfInterest);
+
+            await _cityInfoRepository.SaveChangesAsync();
+
+            var createdPointOfInterestToReturn =
+                _mapper.Map<Models.PointOfInterestDto>(finalPointOfInterest);
+
 
             // Returning generic response
             //return Ok(finalPointOfInterest);
@@ -147,12 +158,12 @@ namespace CityInfo.API.Controllers
                 new
                 {
                     cityId = cityId,
-                    pointOfInterestId = finalPointOfInterest.Id
+                    pointOfInterestId = createdPointOfInterestToReturn.Id /* This Id will automatically filled when we save it to database */
                 },
-                finalPointOfInterest);
+                createdPointOfInterestToReturn);
         }
 
-
+        /*
         [HttpPut("{pointofinterestid}")]
         public ActionResult UpdatePointOfInterest(int cityId, int pointOfInterestId,
             PointOfInterestForUpdateDto pointOfInterest)
@@ -171,6 +182,7 @@ namespace CityInfo.API.Controllers
             return NoContent();
         }
 
+        /*
         [HttpPatch("{pointofinterestid}")]
         public ActionResult PartiallyUpdatePointOfInterest(int cityId, int pointOfInterestId,
             JsonPatchDocument<PointOfInterestForUpdateDto> patchDocument)

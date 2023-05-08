@@ -51,5 +51,23 @@ namespace CityInfo.API.Services
                 .Where(p => p.CityId == cityId)
                 .ToListAsync();// This is line create a list and successfully execute query
         }
+
+        public async Task AddPointOfInterestForCityAsync(int cityId, PointOfInterest pointOfInterest)
+        {
+            var city = await GetCityAsync(cityId, false);
+            if (city != null)
+            {
+                /* ## This method save the object in the inmemory representation of the object
+                   ## We have to save it explicitly in the database to save it in the database
+                   ## To save it directly on the database we can use 'AddAsync()' method
+                */
+                city.PointsOfInterest.Add(pointOfInterest);
+            }
+        }
+
+        public async Task<bool> SaveChangesAsync()
+        {
+            return (await _context.SaveChangesAsync() >= 0); // returns true when zero or more entries would be changed
+        }
     }
 }
