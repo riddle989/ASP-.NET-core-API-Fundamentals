@@ -24,8 +24,11 @@ namespace CityInfo.API.Services
         Task<PointOfInterest?> GetPointOfInterestForCityAsync(int cityId,
             int pointOfInterestId);
 
+        /*It is not an I/O operation, yet we declare it as async, bcz we use "getCityAsync()" method in this method */
         Task AddPointOfInterestForCityAsync(int cityId, PointOfInterest pointOfInterest);
 
         Task<bool> SaveChangesAsync();
+
+        void DeletePointOfInterest(PointOfInterest pointOfInterest);
     }
 }
