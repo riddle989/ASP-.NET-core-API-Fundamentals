@@ -14,6 +14,8 @@ namespace CityInfo.API.Services
         // This is Asynchronous method
         Task<IEnumerable<City>> GetCitiesAsync();
 
+        Task<IEnumerable<City>> GetCitiesAsync(string? name);
+
         Task<bool> CityExistsAsync(int cityId);
 
         // Result can be null if no city is found, so made it nullable 
