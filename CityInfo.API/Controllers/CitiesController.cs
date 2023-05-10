@@ -21,14 +21,14 @@ namespace CityInfo.API.Controllers
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CityDto>>> GetCities(
-            [FromQuery(Name = "filteronname")] string? name) /*We can omit this explicit annotation, as it is not complex type, 
+            [FromQuery(Name = "filteronname")] string? name, string? searchQuery) /*We can omit this explicit annotation, as it is not complex type, 
                                                               * if parameter name is same as query parameter name, 
                                                               * then it will automatically take it from query string
                                                               */
         {
             // We only make async method of data fetching from the database
             // As soon as data retrived, we start processing the data, so don't need the asynchronous method
-            var cityEntities = await _cityInfoRepository.GetCitiesAsync(name);
+            var cityEntities = await _cityInfoRepository.GetCitiesAsync(name, searchQuery);
             return Ok(_mapper.Map<IEnumerable<CityWithoutPointsOfInterestDto>>(cityEntities));
 
             // We will use instead of below code
