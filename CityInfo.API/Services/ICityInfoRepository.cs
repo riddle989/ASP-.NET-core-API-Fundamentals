@@ -14,7 +14,7 @@ namespace CityInfo.API.Services
         // This is Asynchronous method
         Task<IEnumerable<City>> GetCitiesAsync();
 
-        Task<IEnumerable<City>> GetCitiesAsync(string? name, string? searchQuery);
+        Task<IEnumerable<City>> GetCitiesAsync(string? name, string? searchQuery, int pageNumber, int pageSize);
 
         Task<bool> CityExistsAsync(int cityId);
 
