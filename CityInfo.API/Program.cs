@@ -3,7 +3,9 @@ using CityInfo.API.DbContexts;
 using CityInfo.API.Services;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Text;
 
 // Configure the logger
 Log.Logger = new LoggerConfiguration()
@@ -33,12 +35,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
 
 
+/*====================Start Custom services====================*/
 
-
-// Custom services
-// Use different service based on environment using compiler directive
+/* Use different service based on environment using compiler directive*/
 #if DEBUG
-// This means, Whenever we inject "IMailService" in our code,we want to provide an instance of "LocalMailService"
+/* This means, Whenever we inject "IMailService" in our code,we want to provide an instance of "LocalMailService" */
 builder.Services.AddTransient<IMailService, LocalMailService>();
 #else
 builder.Services.AddTransient<IMailService, CloudMailService>();
@@ -51,9 +52,23 @@ builder.Services.AddDbContext<CityInfoContext>(
         )
     );
 
-// "AddScoped" - created once per request
+/* "AddScoped" - created once per request */
 builder.Services.AddScoped<ICityInfoRepository, CityInfoRepository>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Authentication:Issuer"],
+            ValidAudience = builder.Configuration["Authentication:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.ASCII.GetBytes(builder.Configuration["Authentication:SecretForKey"]))
+        };
+    });
 
 
 
@@ -61,6 +76,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
 
+/*====================End Custom services====================*/
 
 var app = builder.Build();
 
@@ -74,6 +90,11 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 //app.UseRouting();
+
+/* Before any endpoint is selected and before checking any authorization policy we need to authenticate the endpoint, 
+ So we configured our Authentication middleware 
+*/
+app.UseAuthentication();
 
 app.UseAuthorization();
 
