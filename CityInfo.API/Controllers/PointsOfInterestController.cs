@@ -57,7 +57,7 @@ namespace CityInfo.API.Controllers
             //        _logger.LogInformation($"City with id {cityId} wasn't found....!");
             //        return NotFound();
             //    }
-                
+
             //    return Ok(city.PointsOfInterest);
             //}
             //catch (Exception ex)
@@ -68,8 +68,19 @@ namespace CityInfo.API.Controllers
             //    // As we are catching the error, We need to manually send the error to the response
             //    return StatusCode(500, "Custom msg - A problem happend while handling your reqeust.");
             //}
-            
-            if(!await _cityInfoRepository.CityExistsAsync(cityId))
+
+            /*=========Only user from a city can request that city's POI=========*/
+
+            /* Every field in the token regard as "type" */
+            var cityName = User.Claims.FirstOrDefault(c => c.Type == "city")?.Value;
+
+            if (!await _cityInfoRepository.CityNameMatchesCityId(cityName, cityId))
+            {
+                return Forbid();
+            }
+            /*=========Only user from a city can request that city's POI=========*/
+
+            if (!await _cityInfoRepository.CityExistsAsync(cityId))
             {
                 _logger.LogInformation($"City with id {cityId} wasn't found....!");
                 return NotFound();

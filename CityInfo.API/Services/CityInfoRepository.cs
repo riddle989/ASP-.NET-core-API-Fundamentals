@@ -114,6 +114,12 @@ namespace CityInfo.API.Services
             return (await _context.SaveChangesAsync() >= 0); // returns true when zero or more entries would be changed
         }
 
+        public async Task<bool> CityNameMatchesCityId(string? cityName, int cityId)
+        {
+            /*Checking Whether the requested POI's cityId matches the user cityname from the token */
+            return await _context.Cities.AnyAsync(c => c.Id == cityId && c.Name == cityName);
+        }
+
         public void DeletePointOfInterest(PointOfInterest pointOfInterest)
         {
             _context.PointOfInterests.Remove(pointOfInterest);
