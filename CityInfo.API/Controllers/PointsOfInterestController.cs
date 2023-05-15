@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CityInfo.API.Controllers
 {
-    [Route("api/cities/{cityId}/pointsofinterest")]
+    [Route("api/v{version:apiVersion}/cities/{cityId}/pointsofinterest")]
+    [ApiVersion("1.0")]
+    [ApiVersion("2.0")]
     //[Authorize(Policy = "MustBeSylhet")]
     [ApiController]
     public class PointsOfInterestController : ControllerBase
@@ -69,16 +71,16 @@ namespace CityInfo.API.Controllers
             //    return StatusCode(500, "Custom msg - A problem happend while handling your reqeust.");
             //}
 
-            /*=========Only user from a city can request that city's POI=========*/
+            /* We will use authorization policy instead of below code */
+            ///*=========Only user from a city can request that city's POI=========*/
+            ///* Every field in the token regard as "type" */
+            //var cityName = User.Claims.FirstOrDefault(c => c.Type == "city")?.Value;
 
-            /* Every field in the token regard as "type" */
-            var cityName = User.Claims.FirstOrDefault(c => c.Type == "city")?.Value;
-
-            if (!await _cityInfoRepository.CityNameMatchesCityId(cityName, cityId))
-            {
-                return Forbid();
-            }
-            /*=========Only user from a city can request that city's POI=========*/
+            //if (!await _cityInfoRepository.CityNameMatchesCityId(cityName, cityId))
+            //{
+            //    return Forbid();
+            //}
+            ///*=========Only user from a city can request that city's POI=========*/
 
             if (!await _cityInfoRepository.CityExistsAsync(cityId))
             {
