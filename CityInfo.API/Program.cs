@@ -69,6 +69,14 @@ builder.Services.AddAuthentication("Bearer")
                 Encoding.ASCII.GetBytes(builder.Configuration["Authentication:SecretForKey"]))
         };
     });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("MustBeSylhet", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("city", "Sylhet");
+    });
+});
 
 
 
