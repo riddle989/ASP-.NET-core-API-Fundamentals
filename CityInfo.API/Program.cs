@@ -69,6 +69,7 @@ builder.Services.AddAuthentication("Bearer")
                 Encoding.ASCII.GetBytes(builder.Configuration["Authentication:SecretForKey"]))
         };
     });
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("MustBeSylhet", policy =>
@@ -78,7 +79,12 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
-
+builder.Services.AddApiVersioning(setupAction =>
+{
+    setupAction.AssumeDefaultVersionWhenUnspecified = true;
+    setupAction.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
+    setupAction.ReportApiVersions = true;
+});
 
 
 
