@@ -28,7 +28,10 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+/* Built-in services, that exposes information of API, like available endpoints / how to interact with them */
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
 
 // This service provides us the file extension types
@@ -97,7 +100,10 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    /* This generates open api specification in json format, based on this A UI is created*/
     app.UseSwagger(); // Generates specification json file for the reqeust
+
+    /* Creates a UI, based on specification */
     app.UseSwaggerUI(); // Generates UI for that specifications and show it
 }
 
