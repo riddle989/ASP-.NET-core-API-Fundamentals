@@ -24,9 +24,9 @@ app.MapControllers();
 
 // Below code output the stirng if there is no middleware configured
 // remove "swagger" from the url
-app.Run(async (context) =>
-{
-    await context.Response.WriteAsync("Hello world!");
-});
+//app.Run(async (context) =>
+//{
+//    await context.Response.WriteAsync("Hello world!");
+//});
 
 app.Run();
