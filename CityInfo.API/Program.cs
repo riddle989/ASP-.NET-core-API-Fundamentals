@@ -1,3 +1,5 @@
+using CityInfo.API;
+using CityInfo.API.services;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -20,6 +22,14 @@ builder.Services.AddControllers()
     .AddNewtonsoftJson();
 
 
+#if DEBUG
+builder.Services.AddTransient<IMailService, LocalMailService>();
+#else
+builder.Services.AddTransient<IMailService, CloudMailService>();
+#endif
+
+
+builder.Services.AddSingleton<CitiesDataStore>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
