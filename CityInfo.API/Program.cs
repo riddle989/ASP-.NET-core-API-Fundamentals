@@ -1,9 +1,21 @@
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .WriteTo.File("logs/cityinfo.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
 // Add services to the container.
+//builder.Logging.ClearProviders();
+//builder.Logging.AddConsole();
 
 builder.Services.AddControllers()
     .AddNewtonsoftJson();
+
+builder.Host.UseSerilog();
 
 
 

@@ -9,16 +9,36 @@ namespace CityInfo.API.Controllers
     [ApiController]
     public class PointOfInterestsController : ControllerBase
     {
+        private readonly ILogger<PointOfInterestsController> _logger;
+
+        public PointOfInterestsController(ILogger<PointOfInterestsController> logger)
+        {
+            _logger = logger ?? throw new NullReferenceException(nameof(logger));
+        }
+
         [HttpGet]
         public ActionResult<IEnumerable<PointOfInterestDto>> GetPointOfInterests(int cityId)
         {
-            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
-            if (city == null)
+            try
             {
-                return NotFound();
-            }
+                //throw new NotImplementedException("Custom exception");
+                var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+                if (city == null)
+                {
+                    _logger.LogDebug($"CityInfo with city id {cityId} not found");
+                    _logger.LogInformation($"CityInfo with city id {cityId} not found");
+                    _logger.LogCritical($"CityInfo with city id {cityId} not found");
+                    _logger.LogError($"CityInfo with city id {cityId} not found");
+                    return NotFound();
+                }
 
-            return Ok(city.PointsOfInterest);
+                return Ok(city.PointsOfInterest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception occured with exception {ex}");
+                return StatusCode(500, "An internal server error");
+            }
         }
 
         [HttpGet("{pointofinterestid}", Name = "GetPointOfInterest")]
